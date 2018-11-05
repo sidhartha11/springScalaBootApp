@@ -7,9 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springscala.entity.{Users,EventResponse,EventRequest}
-import org.springscala.services.UserService
-import org.springscala.services.EventService
+import org.springscala.entity.{Users,EventResponse,EventRequest,TrafficRequest,TrafficResponse}
+import org.springscala.services.{UserService,EventService,TrafficService}
 
 import javax.sql.DataSource
 import org.springframework.http.HttpStatus
@@ -23,7 +22,13 @@ import org.springframework.web.bind.annotation.DeleteMapping
 
 @RestController
 @RequestMapping(path = Array("/api"))
-class UserController(@Autowired private val eventService: EventService,@Autowired private val userService: UserService, @Autowired private val dataSource: DataSource) {
+class UserController(
+    @Autowired private val eventService: EventService,
+    @Autowired private val userService: UserService, 
+    @Autowired private val trafficService: TrafficService, 
+
+    @Autowired private val dataSource: DataSource
+    ) {
 
   def myName = this.getClass.getName
 
@@ -83,6 +88,8 @@ class UserController(@Autowired private val eventService: EventService,@Autowire
     emit(myName + ">entered event", true)
     val newEvent = new EventResponse
     newEvent.setEvent(event.getEvent())
+    newEvent.setLocation(event.getLocation)
+    newEvent.setTimeStamp(event.getTimeStamp)
 
     val id = eventService.createEventResponse(newEvent)
 
@@ -94,6 +101,37 @@ class UserController(@Autowired private val eventService: EventService,@Autowire
     emit(myName + ">entered updateevent", true)
     println("updating " + event)
     val id = eventService.updateEventResponse(event)
+
+    new ResponseEntity(id, new HttpHeaders, HttpStatus.CREATED)
+  }
+  
+    /**
+   * TRAFFIC REQUEST PROCESSING SECTION
+   */
+  @PostMapping(path = Array("/trafficrequest"))
+  def getTrafficRequest(@RequestBody request: TrafficRequest): ResponseEntity[TrafficResponse] = {
+    emit(myName + ">entered getTrafficRequest:" + request, true)
+    new ResponseEntity(trafficService.getRoutRandomResponse(request).get, new HttpHeaders, HttpStatus.CREATED)
+    //    userService.getUser(id).get
+  }
+  
+    @PostMapping(path = Array("/createtrafficrequest"))
+  def createTrafficRequest(@RequestBody request: TrafficRequest): ResponseEntity[Long] = {
+    emit(myName + ">entered createTrafficRequest", true)
+    val newRequest = new TrafficRequest
+    newRequest.setDestination(request.getDestination())
+    newRequest.setArrivalTime(request.getArrivalTime())
+
+    val id = trafficService.createTrafficRequest(newRequest)
+
+    new ResponseEntity(id, new HttpHeaders, HttpStatus.CREATED)
+  }
+
+  @PostMapping(path = Array("/updatetrafficrequest"))
+  def updateTrafficRequest(@RequestBody request: TrafficRequest): ResponseEntity[Long] = {
+    emit(myName + ">entered updateTrafficRequest", true)
+    emit(myName + ">updating " + request,true)
+    val id = trafficService.updateTrafficRequest(request)
 
     new ResponseEntity(id, new HttpHeaders, HttpStatus.CREATED)
   }

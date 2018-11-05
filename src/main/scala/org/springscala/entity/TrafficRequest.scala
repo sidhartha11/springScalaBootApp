@@ -12,11 +12,12 @@ import javax.persistence.GenerationType
 import javax.persistence.Column
 
 import java.util.{Date}
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
-case class Event(body: String)
-// (ticket: Int, event: Event)
+
 @Entity
-class EventResponse extends Serializable {
+class TrafficRequest extends Serializable {
   
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,18 +25,13 @@ class EventResponse extends Serializable {
   var id: Long = _
   
   @BeanProperty
-  @Column(name = "event")
-  var event: String = _
-  
+  @Column(name = "destination")
+  var destination: String = _
+ 
   @BeanProperty
-  @Column(name = "location")
-  var location: String = _
+  @Column(name = "arrivalTime" , columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+  @Temporal(TemporalType.TIMESTAMP)
+  var arrivalTime: Date = _
   
-  @BeanProperty
-  @Column(name = "timeStamp")
-  var timeStamp: String = _
-  
-  
-  override def toString = "id:%d, event:%s, location:%s".format(id,event,location,timeStamp)
-
+  override def toString = "TrafficRequest [id:%d, destination:%s, arrivalTime:%s]".format(id,destination,arrivalTime)
 }
